@@ -1,6 +1,7 @@
 package com.example.anurag.viewpager;
 
 import android.os.Bundle;
+import android.support.v4.widget.NestedScrollView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ public class FragmentViewPager extends android.support.v4.app.Fragment {
         return f;
     }
 
+    public NestedScrollView nestedscroll;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
@@ -38,6 +41,15 @@ public class FragmentViewPager extends android.support.v4.app.Fragment {
         ImageView imageView = v.findViewById(R.id.image);
         imageView.setBackgroundResource(getArguments().getInt("img"));
 
+        nestedscroll = v.findViewById(R.id.nestedscroll);
+
+
         return v;
     }
+
+
+    public NestedScrollView getNestedScrollView(){
+        return nestedscroll;
+    }
+
 }
