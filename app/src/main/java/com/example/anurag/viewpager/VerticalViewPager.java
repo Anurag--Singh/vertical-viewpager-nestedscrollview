@@ -7,6 +7,7 @@ package com.example.anurag.viewpager;
  * Time: 3:12 PM
  */
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -14,6 +15,10 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public class VerticalViewPager extends ViewPager {
+
+
+    float mStartDragX;
+
     public VerticalViewPager(Context context) {
         this(context, null);
     }
@@ -43,14 +48,64 @@ public class VerticalViewPager extends ViewPager {
         // Make page transit vertical
         setPageTransformer(true, new VerticalPageTransformer());
         // Get rid of the overscroll drawing that happens on the left and right (the ripple)
-        setOverScrollMode(View.OVER_SCROLL_NEVER);
+     //   setOverScrollMode(View.OVER_SCROLL_NEVER);
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        final boolean toIntercept = super.onInterceptTouchEvent(flipXY(ev));
+        boolean toIntercept = super.onInterceptTouchEvent(flipXY(ev));
         // Return MotionEvent to normal
+
+
+        float x = ev.getX();
+
         flipXY(ev);
+        int direction=1;
+
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mStartDragX = x;
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (mStartDragX < x ) {
+                    direction=-1;
+                } else if (mStartDragX > x) {
+                    direction=1;
+                }
+                MainActivity.MyPagerAdapter adapter = (MainActivity.MyPagerAdapter)this.getAdapter();
+                if (adapter.getCurrentFragment() instanceof FragmentViewPager){
+                    FragmentViewPager fragmentViewPager = (FragmentViewPager)adapter.getCurrentFragment();
+                    toIntercept = !fragmentViewPager.getNestedScrollView().canScrollVertically(direction);
+                    int range = fragmentViewPager.getNestedScrollView().computeVerticalScrollRange();
+                    int offset = fragmentViewPager.getNestedScrollView().computeVerticalScrollOffset();
+                    int extent = fragmentViewPager.getNestedScrollView().computeVerticalScrollExtent();
+                    int percentage = (int)(100.0 * offset / (float)(range - extent));
+                    
+                    System.out.println("  range: "+range);
+                    System.out.print("  offset: "+offset);
+                    System.out.print("  extent: "+extent);
+                    System.out.print("  percentage: "+percentage);
+                    System.out.print("  direction: "+direction);
+
+                    if (fragmentViewPager.getNestedScrollView().computeVerticalScrollOffset()==0 && direction==-1){
+                        //top
+                        return true;
+                    }else if (percentage>99 && direction==1){
+                        //bottom
+                        return true;
+                    }else {
+                        //scroll viewpager
+                        return false;
+                    }
+
+                }
+
+                break;
+        }
+
+
         return toIntercept;
     }
 
@@ -62,6 +117,8 @@ public class VerticalViewPager extends ViewPager {
         return toHandle;
     }
 
+
+
     private MotionEvent flipXY(MotionEvent ev) {
         final float width = getWidth();
         final float height = getHeight();
@@ -70,6 +127,8 @@ public class VerticalViewPager extends ViewPager {
         ev.setLocation(x, y);
         return ev;
     }
+
+
 
     private static final class VerticalPageTransformer implements ViewPager.PageTransformer {
         @Override
