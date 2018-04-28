@@ -1,10 +1,13 @@
 package com.example.anurag.viewpager;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ViewGroup;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,10 +20,24 @@ public class MainActivity extends AppCompatActivity {
         verticalViewPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
     }
 
-    private class MyPagerAdapter extends FragmentPagerAdapter {
+    public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
+        }
+
+        private Fragment mCurrentFragment;
+
+        public Fragment getCurrentFragment() {
+            return mCurrentFragment;
+        }
+        //...
+        @Override
+        public void setPrimaryItem(ViewGroup container, int position, Object object) {
+            if (getCurrentFragment() != object) {
+                mCurrentFragment = ((Fragment) object);
+            }
+            super.setPrimaryItem(container, position, object);
         }
 
         @Override
@@ -35,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
                 case 3:
                     return FragmentViewPager.newInstance("Scissors", R.drawable.scissors);
                 case 4:
-                    return FragmentViewPager.newInstance("Title End", R.drawable.ic_launcher_foreground);
+                    return FragmentViewPager.newInstance("Title End", R.drawable.ic_launcher_background);
                 default:
                     return FragmentViewPager.newInstance("Default Title", R.drawable.rock);
             }
